@@ -65,7 +65,7 @@
 (defmethod window:size ((screen screen))
   )
 
-(defun call-with-screen (function &optional (screen-class 'screen) &rest initargs)
+(defun call-with-screen (function &optional (screen-class 'screen) on-loop &rest initargs)
   (let (screen
         (start (get-internal-real-time)))
     (glfw:init)
@@ -75,7 +75,8 @@
            (alloy:allocate screen)
            (funcall function screen)
            (loop until (glfw:should-close-p screen)
-                 do (glfw:poll-events :timeout (float 1/30 0d0))
+                 do (when on-loop (funcall on-loop))
+		    (glfw:poll-events :timeout (float 1/30 0d0))
                     (alloy:do-elements (window (alloy:root (alloy:layout-tree screen)))
                       (when (glfw:should-close-p window)
                         (alloy:deallocate window)))
